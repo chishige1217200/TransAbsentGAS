@@ -105,7 +105,7 @@ function setup() { // FormAppの権限取得とWebhookのテスト
   const classInfo = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getValues(); //チャネル識別名とURL
   // Logger.log(classInfo);
 
-  notifyToSlack("これはテストメッセージです", getHookURLfromClassName("エラーログ"));
+  // 全チャンネルにテストメッセージを送信します．迷惑なので初回セットアップ時にのみテストしてください．
   for (let i = 0; i < classInfo.length; i++) {
     notifyToSlack("【テスト】送信テストを行います．クラス名が一致しているか確認してください．クラス名: " + classInfo[i][0], classInfo[i][1]);
   }

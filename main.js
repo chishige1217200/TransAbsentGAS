@@ -11,7 +11,7 @@ var spreadSheetURL = "";
  */
 function onFormSubmit(formData) {
   let itemResponses; // ここに全問が集約（問題文なども含まれる）https://developers.google.com/apps-script/reference/forms/form-response
-  let responseslist = []; // 回答内容の必要部分だけ格納 0番目が1個目の問の回答
+  let responseslist = []; // 回答内容の必要部分だけ格納 0番目が1個目の問の回答 https://developers.google.com/apps-script/reference/forms/item-responseのリスト
   let messtr = ""; // Slackに送信する文字列
 
   let date = new Date(); // 現在時刻取得
@@ -33,7 +33,9 @@ function onFormSubmit(formData) {
     responseslist.push(itemResponses[i].getResponse()); // 回答をリストに連結
   }
 
-  // 振替を選択したとき　＊選択肢の文字列と比較するので選択肢と一致させること
+  console.log(responseslist); // 回答情報デバッグ表示
+
+  // 振替を選択したとき ＊選択肢の文字列と比較するので選択肢と一致させること
   if (responseslist[1] === "振替") {
     messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスから" +
       responseslist[3] + "クラスへの振替を希望しています．以下自由記述: " + responseslist[4];
@@ -48,7 +50,7 @@ function onFormSubmit(formData) {
     if (responseslist[2] === responseslist[3]) {
       notifyToSlack(messtr, getWebHookURLfromClassName("エラーログ"), true);
       console.log("【警告】振替元クラスと振替先クラスが一致していることが検出されました．推定実行時刻: " + date);
-      notifyToSlack("【警告】振替元クラスと振替先クラスが一致していることが検出されました．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+      notifyToSlack("【警告】振替元クラスと振替先クラスが一致していることが検出されました．送信者: " + responseslist[0] + "．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
     }
   }
   // 欠席を選択したとき
@@ -65,8 +67,8 @@ function onFormSubmit(formData) {
   }
   // それ以外（未実装）の選択肢を選択したとき
   else {
-    console.error("【エラー】この選択肢は現在実装されていません．");
-    notifyToSlack("【エラー】この選択肢は現在実装されていません．実行ログを確認してください．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+    console.error("【エラー】この選択肢は現在実装されていません．選択肢名: " + responseslist[1]);
+    notifyToSlack("【エラー】この選択肢は現在実装されていません．実行ログを確認してください．選択肢名: " + responseslist[1] + "．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
   }
 }
 

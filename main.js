@@ -94,8 +94,8 @@ function getWebHookURLfromClassName(className) {
     }
   }
 
-  console.error("【エラー】入力されたチャネル識別名が見つかりませんでした．クラス名: " + className);
-  notifyToSlack("【エラー】入力されたチャネル識別名が見つかりませんでした．実行ログを確認してください．クラス名: " + className, getWebHookURLfromClassName("エラーログ"), true);
+  console.error("【エラー】入力されたクラス識別名が見つかりませんでした．クラス名: " + className);
+  notifyToSlack("【エラー】入力されたクラス識別名が見つかりませんでした．実行ログを確認してください．クラス名: " + className, getWebHookURLfromClassName("エラーログ"), true);
   return null; // エラー
 }
 
@@ -109,7 +109,7 @@ function getWebHookSheet() {
   let sheet; // WebHookURLが記されたシートhttps://developers.google.com/apps-script/reference/spreadsheet/sheet
 
   if (spreadSheetURL === "") {
-    console.error("【エラー】スプレッドシートのURLが入力されていません");
+    console.error("【エラー】スプレッドシートのURLが入力されていません．");
     return null; // エラー
   }
 
@@ -181,7 +181,7 @@ function classNameCheck() {
  */
 function notifyToSlack(messtr, slackWebHookURL, doMention) {
   if (slackWebHookURL === "" | slackWebHookURL === null) {
-    console.error("【エラー】WebHook URLが入力されていません");
+    console.error("【エラー】WebHook URLが入力されていません．");
     return; // エラー
   }
 

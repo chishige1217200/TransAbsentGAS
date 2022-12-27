@@ -10,7 +10,7 @@ var spreadSheetURL = "";
  * @returns {void} 戻り値なし
  */
 function onFormSubmit(formData) {
-  let itemResponses; // ここに全問が集約（問題文なども含まれる）
+  let itemResponses; // ここに全問が集約（問題文なども含まれる）https://developers.google.com/apps-script/reference/forms/form-response
   let responseslist = []; // 回答内容の必要部分だけ格納 0番目が1個目の問の回答
   let messtr = ""; // Slackに送信する文字列
 
@@ -103,8 +103,8 @@ function getWebHookURLfromClassName(className) {
  * @returns {null} エラー時null
  */
 function getWebHookSheet() {
-  let ss; // WebHookURLが記されたシートを含むスプレッドシート
-  let sheet; // WebHookURLが記されたシート
+  let ss; // WebHookURLが記されたシートを含むスプレッドシートhttps://developers.google.com/apps-script/reference/spreadsheet/spreadsheet
+  let sheet; // WebHookURLが記されたシートhttps://developers.google.com/apps-script/reference/spreadsheet/sheet
 
   if (spreadSheetURL === "") {
     console.error("【エラー】スプレッドシートのURLが入力されていません");

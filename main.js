@@ -180,7 +180,7 @@ function classNameCheck() {
  * @returns {void} 戻り値なし
  */
 function notifyToSlack(messtr, slackWebHookURL, doMention) {
-  if (slackWebHookURL === "" | slackWebHookURL === null) {
+  if (slackWebHookURL === "" || slackWebHookURL === null) {
     console.error("【エラー】WebHook URLが入力されていません．");
     return; // エラー
   }

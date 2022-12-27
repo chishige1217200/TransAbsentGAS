@@ -1,6 +1,14 @@
-var spreadSheetURL = ""
-// WebHookURLの一覧が記入されたスプレッドシートのURL（例：https://docs.google.com/spreadsheets/d/abc1234567/edit）
+/**
+ * WebHookURLの一覧が記入されたスプレッドシートのURL（例：https://docs.google.com/spreadsheets/d/abc1234567/edit）
+ * @type {string}
+ */
+var spreadSheetURL = "";
 
+/**
+ * Googleフォームを提出したときに実行する関数
+ * @param {object} formData Googleフォームの情報
+ * @returns {void} 戻り値なし
+ */
 function onFormSubmit(formData) {
   let itemResponses; // ここに全問が集約（問題文なども含まれる）
   let responseslist = []; // 回答内容の必要部分だけ格納 0番目が1個目の問の回答
@@ -60,9 +68,14 @@ function onFormSubmit(formData) {
     console.error("【エラー】この選択肢は現在実装されていません．");
     notifyToSlack("【エラー】この選択肢は現在実装されていません．実行ログを確認してください．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
   }
-
 }
 
+/**
+ * クラス識別名からWebHookURLを取得する関数
+ * @param {string} className クラス識別名
+ * @returns {string} 正常時string
+ * @returns {null} エラー時null
+ */
 function getWebHookURLfromClassName(className) {
   const sheet = getWebHookSheet(); // エラー時はnull
 
@@ -84,6 +97,11 @@ function getWebHookURLfromClassName(className) {
   return null; // エラー
 }
 
+/**
+ * "WebHookURL"という名前がついたシートを取得する関数（＊スプレッドシートではない）
+ * @returns {Sheet} 正常時https://developers.google.com/apps-script/reference/spreadsheet/sheet
+ * @returns {null} エラー時null
+ */
 function getWebHookSheet() {
   let ss; // WebHookURLが記されたシートを含むスプレッドシート
   let sheet; // WebHookURLが記されたシート
@@ -114,10 +132,14 @@ function getWebHookSheet() {
   return sheet; // 正常
 }
 
+/**
+ * フォームの権限取得とWebHookの権限取得
+ *     エラーログチャンネルにWebHookのテストメッセージを送信する関数
+ * @returns {void} 戻り値なし
+ */
 function setup() {
-  // FormAppの権限取得とWebhookのテスト
   const form = FormApp.getActiveForm(); // フォームを開く（権限取得のためだけに）
-  const sheet = getWebHookSheet(); // エラー時はnullが返ってくる
+  const sheet = getWebHookSheet(); // WebHookURLを含むシート
 
   if (sheet === null) {
     console.error("【エラー】WebHook処理を行えないため，処理を中止します．");
@@ -127,6 +149,10 @@ function setup() {
   notifyToSlack("【テスト】送信テストを行います．これは初回動作チェックです．エラーログチャンネルにのみ通知されます．", getWebHookURLfromClassName("エラーログ"), true);
 }
 
+/**
+ * 全クラスに対してWebHookのテストメッセージを送信する関数
+ * @returns {void} 戻り値なし
+ */
 function classNameCheck() {
   const sheet = getWebHookSheet(); // エラー時はnullが返ってくる
 
@@ -144,6 +170,13 @@ function classNameCheck() {
   }
 }
 
+/**
+ * SlackにWebHookを送信する関数
+ * @param {string} messtr 送信する文字列
+ * @param {string} slackWebHookURL 送信先のWebHookURL
+ * @param {boolean} doMention メンション機能の使用
+ * @returns {void} 戻り値なし
+ */
 function notifyToSlack(messtr, slackWebHookURL, doMention) {
   if (slackWebHookURL === "" | slackWebHookURL === null) {
     console.error("【エラー】WebHook URLが入力されていません");

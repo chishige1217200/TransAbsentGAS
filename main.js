@@ -22,7 +22,7 @@ function onFormSubmit(formData) {
   }
   catch (e) {
     // 例外エラー処理，稀に回答情報が取得できないことがあるようです．
-    console.error("フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date);
+    console.error("【エラー】フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date);
     Logger.log(e);
     notifyToSlack("【エラー】フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
     return;

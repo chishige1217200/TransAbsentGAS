@@ -1,10 +1,24 @@
-var spreadSheetURL = "https://docs.google.com/spreadsheets/d/1leXb6TdyBbYNxY2Zu3AMg9GU8Y393hrtoRETTg6Cl90/edit"
+var spreadSheetURL = ""
 // WebHookURLの一覧が記入されたスプレッドシートのURL（例：https://docs.google.com/spreadsheets/d/abc1234567/edit）
 
-function onFormSubmit(e) {
-  var itemResponses = e.response.getItemResponses(); // ここに全問が集約（問題文なども含まれる）
-  var responseslist = []; // 回答内容の必要部分だけ格納 0番目が1つめの問の回答
-  var messtr = ""; // Slackに送信する文字列
+function onFormSubmit(formData) {
+  let itemResponses; // ここに全問が集約（問題文なども含まれる）
+  let responseslist = []; // 回答内容の必要部分だけ格納 0番目が1個目の問の回答
+  let messtr = ""; // Slackに送信する文字列
+
+  let date = new Date(); // 現在時刻取得
+  date = Utilities.formatDate(date, "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss"); // 時刻整形
+
+  try {
+    itemResponses = formData.response.getItemResponses();
+  }
+  catch (e) {
+    // 例外エラー処理，稀に回答情報が取得できないことがあるようです．
+    console.error("フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date);
+    Logger.log(e);
+    notifyToSlack("【エラー】フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+    return;
+  }
 
   for (let i = 0; i < itemResponses.length; i++) {
     // Logger.log(itemResponses[i].getResponse());
@@ -16,33 +30,40 @@ function onFormSubmit(e) {
     messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスから" +
       responseslist[3] + "クラスへの振替を希望しています．以下自由記述: " + responseslist[4];
 
-    // 振替元クラスと振替先先クラスが異なるとき（正常）
+    // 振替元クラスと振替先クラスが異なるとき（正常）
     if (responseslist[2] !== responseslist[3]) {
-      notifyToSlack(messtr, getHookURLfromClassName(responseslist[2]));
-      notifyToSlack(messtr, getHookURLfromClassName(responseslist[3]));
+      notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[2]), true);
+      notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[3]), true);
     }
 
     // 振替元クラスと振替先クラスが同じとき（エラー）
     if (responseslist[2] === responseslist[3]) {
-      notifyToSlack(messtr, getHookURLfromClassName("エラーログ"));
-      notifyToSlack("【警告】振替元クラスと振替先クラスが一致していることが検出されました．", getHookURLfromClassName("エラーログ"));
+      notifyToSlack(messtr, getWebHookURLfromClassName("エラーログ"), true);
+      console.log("【警告】振替元クラスと振替先クラスが一致していることが検出されました．推定実行時刻: " + date);
+      notifyToSlack("【警告】振替元クラスと振替先クラスが一致していることが検出されました．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
     }
   }
   // 欠席を選択したとき
   else if (responseslist[1] === "欠席") {
     messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスを欠席します．以下自由記述: " + responseslist[3];
 
-    notifyToSlack(messtr, getHookURLfromClassName(responseslist[2]));
+    notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[2]), true);
   }
   // ドア開けを選択したとき
   else if (responseslist[1] === "ドア開け") {
     messtr = responseslist[0] + "さんがドアを開けてほしいようです．以下自由記述: " + responseslist[2];
 
-    notifyToSlack(messtr, getHookURLfromClassName("全体"));
+    notifyToSlack(messtr, getWebHookURLfromClassName("全体"), true);
   }
+  // それ以外（未実装）の選択肢を選択したとき
+  else {
+    console.error("【エラー】この選択肢は現在実装されていません．");
+    notifyToSlack("【エラー】この選択肢は現在実装されていません．実行ログを確認してください．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+  }
+
 }
 
-function getHookURLfromClassName(className) {
+function getWebHookURLfromClassName(className) {
   const sheet = getWebHookSheet(); // エラー時はnull
 
   if (sheet === null) {
@@ -58,17 +79,17 @@ function getHookURLfromClassName(className) {
     }
   }
 
-  console.error("入力されたチャネル識別名が見つかりませんでした");
-  notifyToSlack("【エラー】入力されたチャネル識別名が見つかりませんでした．実行ログを確認してください．クラス名: " + className, getHookURLfromClassName("エラーログ"));
+  console.error("【エラー】入力されたチャネル識別名が見つかりませんでした．クラス名: " + className);
+  notifyToSlack("【エラー】入力されたチャネル識別名が見つかりませんでした．実行ログを確認してください．クラス名: " + className, getWebHookURLfromClassName("エラーログ"), true);
   return null; // エラー
 }
 
 function getWebHookSheet() {
   let ss; // WebHookURLが記されたシートを含むスプレッドシート
-  var sheet; // WebHookURLが記されたシート
+  let sheet; // WebHookURLが記されたシート
 
   if (spreadSheetURL === "") {
-    console.error("スプレッドシートのURLが入力されていません");
+    console.error("【エラー】スプレッドシートのURLが入力されていません");
     return null; // エラー
   }
 
@@ -76,7 +97,7 @@ function getWebHookSheet() {
     ss = SpreadsheetApp.openByUrl(spreadSheetURL); // スプレッドシートを開く
   } catch (e) {
     // 例外エラー処理
-    console.error("スプレッドシートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
+    console.error("【エラー】スプレッドシートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
     Logger.log(e);
     return null; // エラー
   }
@@ -85,7 +106,7 @@ function getWebHookSheet() {
     sheet = ss.getSheetByName("WebHookURL"); // シートを開く
   } catch (e) {
     // 例外エラー処理
-    console.error("シートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
+    console.error("【エラー】シートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
     Logger.log(e);
     return null; // エラー
   }
@@ -93,28 +114,45 @@ function getWebHookSheet() {
   return sheet; // 正常
 }
 
-function setup() { // FormAppの権限取得とWebhookのテスト
+function setup() {
+  // FormAppの権限取得とWebhookのテスト
   const form = FormApp.getActiveForm(); // フォームを開く（権限取得のためだけに）
   const sheet = getWebHookSheet(); // エラー時はnullが返ってくる
 
   if (sheet === null) {
-    Logger.log("WebHook処理を行えないため，処理を中止します．");
+    console.error("【エラー】WebHook処理を行えないため，処理を中止します．");
+    return; // エラー
+  }
+
+  notifyToSlack("【テスト】送信テストを行います．これは初回動作チェックです．エラーログチャンネルにのみ通知されます．", getWebHookURLfromClassName("エラーログ"), true);
+}
+
+function classNameCheck() {
+  const sheet = getWebHookSheet(); // エラー時はnullが返ってくる
+
+  if (sheet === null) {
+    console.error("【エラー】WebHook処理を行えないため，処理を中止します．");
     return; // エラー
   }
 
   const classInfo = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getValues(); //チャネル識別名とURL
   // Logger.log(classInfo);
 
-  // 全チャンネルにテストメッセージを送信します．迷惑なので初回セットアップ時にのみテストしてください．
+  // 全チャンネルにテストメッセージを送信します．
   for (let i = 0; i < classInfo.length; i++) {
-    notifyToSlack("【テスト】送信テストを行います．クラス名が一致しているか確認してください．クラス名: " + classInfo[i][0], classInfo[i][1]);
+    notifyToSlack("【テスト】送信テストを行います．クラス名が一致しているか確認してください．クラス名: " + classInfo[i][0], classInfo[i][1], true);
   }
 }
 
-function notifyToSlack(messtr, slackWebHookURL) {
+function notifyToSlack(messtr, slackWebHookURL, doMention) {
   if (slackWebHookURL === "" | slackWebHookURL === null) {
-    console.error("WebHook URLが入力されていません");
+    console.error("【エラー】WebHook URLが入力されていません");
     return; // エラー
+  }
+
+  // メンション機能
+  if (doMention === undefined || doMention === true) {
+    messtr = "<!channel> " + messtr;
   }
 
   // 投稿ユーザとメッセージ
@@ -122,7 +160,7 @@ function notifyToSlack(messtr, slackWebHookURL) {
   {
     "username": "振替/欠席/ドア開け連絡",
     "icon_emoji": ":exclamation:",
-    "text": "<!channel>" + messtr
+    "text": messtr
   };
   const payload = JSON.stringify(jsonData);
 
@@ -138,7 +176,7 @@ function notifyToSlack(messtr, slackWebHookURL) {
     Logger.log(res);
   } catch (e) {
     // 例外エラー処理
-    console.error("WebHookでエラーが発生しました．エラー内容は以下のとおりです．");
+    console.error("【エラー】WebHookでエラーが発生しました．エラー内容は以下のとおりです．");
     Logger.log(e);
   }
 }

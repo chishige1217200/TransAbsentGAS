@@ -105,21 +105,46 @@ try {
 この「例外が発生する可能性のある処理」というのは，自分でプログラミングした処理ではなくライブラリに頼っている処理のことである．今回の場合であれば`SpreadsheetApp.openByUrl(spreadSheetURL)`などの処理が該当する．これは`spreadSheetURL`で指定されたGoogleスプレッドシートを開くライブラリ関数であるが，これはGoogleによって提供されている関数であり，自分でプログラミングしたものではない．ライブラリ関数で発生した例外はtry, catch文で対応するのが一般的であり，ここでは`e`に例外情報を代入させている．`Logger.log(e)`とプログラムに書いておけば，例外情報を出力することができる．
 
 ---
+### JSDocコメント編
+JavaScript及びGoogleAppsScriptでは，型の概念が曖昧である．そのため，関数間の値のやり取りが曖昧になる問題がある．JSDocコメントは，関数や変数の宣言の直前に`/** Comment */`を書く記法のことであり，ルールに沿ったコメントを書くことでプログラムの可読性を高めるものである．なお，あくまでコメントでありプログラムとしての意味は全くないものであるため，JSDocコメントを書かなくてもプログラムの動作には影響しない．以下に代表的なJSDocコメントを紹介する．
+
+- @param  
+関数の引数を示す@param．関数の引数が何を指すのか明確にする．複数の引数が存在する場合は，引数の個数だけ@paramを順番に記載する．
+- @return / @returns  
+関数の戻り値を示す@return．@returnsは@returnの別名．関数の戻り値が何を指すのか明確にする．
+- @type  
+変数の型を示す@type．型はブラケット`{}`のなかに記載する．
+
+下記は，`getWebHookURLfromClassName()`関数のJSDocコメントである．
+```js
+/**
+ * クラス識別名からWebHookURLを取得する関数
+ * @param {string} className クラス識別名
+ * @returns {string} 正常時string
+ * @returns {null} エラー時null
+ */
+```
+
+JSDocコメントから，この関数は`string`型の引数`className`を取ることが分かる．戻り値は正常時に`string`型の`WebHookURL`が，エラー時は`null`が返されることが分かる．
+
+JSDocに関する詳細は[https://ics.media/entry/6789/](https://ics.media/entry/6789/)を参照すること．
+
+---
 ### ライブラリ編
 Google Apps Scriptにおけるプログラミングでは，Googleが提供する各種`App`を用いることが多い．TransAbsentGASにおいては，`SpreadsheetApp`と`FormApp`を使用している．各クラスの変数に対して，適用できる操作は下記のリファレンスを参照すること．
 
 - SpreadsheetApp  
-https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app
+[https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app](https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app)
   - Spreadsheetクラス : Googleスプレッドシートファイルにアクセスして変更する  
-https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet
+[https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet](https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet)
   - Sheetクラス : スプレッドシート シートにアクセスして変更する  
-https://developers.google.com/apps-script/reference/spreadsheet/sheet
+[https://developers.google.com/apps-script/reference/spreadsheet/sheet](https://developers.google.com/apps-script/reference/spreadsheet/sheet)
   - Rangeクラス : スプレッドシートの範囲にアクセスして変更する  
-https://developers.google.com/apps-script/reference/spreadsheet/range
+[https://developers.google.com/apps-script/reference/spreadsheet/range](https://developers.google.com/apps-script/reference/spreadsheet/range)
 
 - FormApp  
-https://developers.google.com/apps-script/reference/forms/form-app
+[https://developers.google.com/apps-script/reference/forms/form-app](https://developers.google.com/apps-script/reference/forms/form-app)
   - FormResponse : フォーム全体に対する回答  
-https://developers.google.com/apps-script/reference/forms/form-response
+[https://developers.google.com/apps-script/reference/forms/form-response](https://developers.google.com/apps-script/reference/forms/form-response)
   - ItemResponse : フォーム内の 1 つの質問項目に対する回答  
-https://developers.google.com/apps-script/reference/forms/item-response
+[https://developers.google.com/apps-script/reference/forms/item-response](https://developers.google.com/apps-script/reference/forms/item-response)

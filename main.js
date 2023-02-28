@@ -22,9 +22,9 @@ function onFormSubmit(formData) {
   }
   catch (e) {
     // 例外エラー処理，稀に回答情報が取得できないことがあるようです．
-    console.error("【エラー】フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date);
+    console.error("エラー通知\nフォームの回答が正常に取得できませんでした．実行ログを確認してください．\n【推定実行時刻】" + date);
     Logger.log(e);
-    notifyToSlack("【エラー】フォームの回答が正常に取得できませんでした．実行ログを確認してください．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+    notifyToSlack("エラー通知\nフォームの回答が正常に取得できませんでした．実行ログを確認してください．\n【推定実行時刻】" + date, getWebHookURLfromClassName("エラーログ"), true);
     return;
   }
 
@@ -37,38 +37,46 @@ function onFormSubmit(formData) {
 
   // 振替を選択したとき ＊選択肢の文字列と比較するので選択肢と一致させること
   if (responseslist[1] === "振替") {
-    messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスから" +
-      responseslist[3] + "クラスへの振替を希望しています．以下自由記述: " + responseslist[4];
+    messtr = "振替連絡\n【氏名】" + responseslist[0] + "\n【振替元】" + responseslist[2] + "\n【振替先】" + responseslist[3] + "\n【自由記述】" + responseslist[4];
+
+    //messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスから" +
+    //  responseslist[3] + "クラスへの振替を希望しています．以下自由記述: " + responseslist[4];
 
     // 振替元クラスと振替先クラスが異なるとき（正常）
     if (responseslist[2] !== responseslist[3]) {
-      notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[2]), true);
-      notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[3]), true);
+      notifyToSlack(messtr, getWebHookURLfromClassName("全体"), true);
+
+      //notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[2]), true);
+      //notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[3]), true);
     }
 
     // 振替元クラスと振替先クラスが同じとき（エラー）
     if (responseslist[2] === responseslist[3]) {
       notifyToSlack(messtr, getWebHookURLfromClassName("エラーログ"), true);
-      console.log("【警告】振替元クラスと振替先クラスが一致していることが検出されました．推定実行時刻: " + date);
-      notifyToSlack("【警告】振替元クラスと振替先クラスが一致していることが検出されました．送信者: " + responseslist[0] + "．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+      console.log("警告通知\n振替元クラスと振替先クラスが一致していることが検出されました．\n【推定実行時刻】" + date);
+      notifyToSlack("警告通知\n振替元クラスと振替先クラスが一致していることが検出されました．\n【送信者】" + responseslist[0] + "\n【推定実行時刻】" + date, getWebHookURLfromClassName("エラーログ"), false);
     }
   }
   // 欠席を選択したとき
   else if (responseslist[1] === "欠席") {
-    messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスを欠席します．以下自由記述: " + responseslist[3];
+    messtr = "欠席連絡\n【氏名】" + responseslist[0] + "\n【クラス】" + responseslist[2] + "\n【自由記述】" + responseslist[3]
+    notifyToSlack(messtr, getWebHookURLfromClassName("全体"), true);
 
-    notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[2]), true);
+    //messtr = responseslist[0] + "さんが" + responseslist[2] + "クラスを欠席します．以下自由記述: " + responseslist[3];
+    //notifyToSlack(messtr, getWebHookURLfromClassName(responseslist[2]), true);
   }
   // ドア開けを選択したとき
   else if (responseslist[1] === "ドア開け") {
-    messtr = responseslist[0] + "さんがドアを開けてほしいようです．以下自由記述: " + responseslist[2];
-
+    messtr = "ドア開け連絡\n【氏名】" + responseslist[0] + "\n【自由記述】" + responseslist[2];
     notifyToSlack(messtr, getWebHookURLfromClassName("全体"), true);
+
+    //messtr = responseslist[0] + "さんがドアを開けてほしいようです．以下自由記述: " + responseslist[2];
+    //notifyToSlack(messtr, getWebHookURLfromClassName("全体"), true);
   }
   // それ以外（未実装）の選択肢を選択したとき
   else {
-    console.error("【エラー】この選択肢は現在実装されていません．選択肢名: " + responseslist[1]);
-    notifyToSlack("【エラー】この選択肢は現在実装されていません．実行ログを確認してください．選択肢名: " + responseslist[1] + "．推定実行時刻: " + date, getWebHookURLfromClassName("エラーログ"), true);
+    console.error("エラー通知\nこの選択肢は現在実装されていません．\n【選択肢名】" + responseslist[1]);
+    notifyToSlack("エラー通知\nこの選択肢は現在実装されていません．実行ログを確認してください．\n【選択肢名】" + responseslist[1] + "\n【推定実行時刻】" + date, getWebHookURLfromClassName("エラーログ"), true);
   }
 }
 
@@ -94,8 +102,8 @@ function getWebHookURLfromClassName(className) {
     }
   }
 
-  console.error("【エラー】入力されたクラス識別名が見つかりませんでした．クラス名: " + className);
-  notifyToSlack("【エラー】入力されたクラス識別名が見つかりませんでした．実行ログを確認してください．クラス名: " + className, getWebHookURLfromClassName("エラーログ"), true);
+  console.error("エラー通知\n入力されたクラス識別名が見つかりませんでした．\n【クラス名】" + className);
+  notifyToSlack("エラー通知\n入力されたクラス識別名が見つかりませんでした．実行ログを確認してください．\n【クラス名】" + className, getWebHookURLfromClassName("エラーログ"), true);
   return null; // エラー
 }
 
@@ -109,7 +117,7 @@ function getWebHookSheet() {
   let sheet; // WebHookURLが記されたシートhttps://developers.google.com/apps-script/reference/spreadsheet/sheet
 
   if (spreadSheetURL === "") {
-    console.error("【エラー】スプレッドシートのURLが入力されていません．");
+    console.error("エラー通知\nスプレッドシートのURLが入力されていません．");
     return null; // エラー
   }
 
@@ -117,7 +125,7 @@ function getWebHookSheet() {
     ss = SpreadsheetApp.openByUrl(spreadSheetURL); // スプレッドシートを開く
   } catch (e) {
     // 例外エラー処理
-    console.error("【エラー】スプレッドシートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
+    console.error("エラー通知\nスプレッドシートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
     Logger.log(e);
     return null; // エラー
   }
@@ -126,7 +134,7 @@ function getWebHookSheet() {
     sheet = ss.getSheetByName("WebHookURL"); // シートを開く
   } catch (e) {
     // 例外エラー処理
-    console.error("【エラー】シートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
+    console.error("エラー通知\nシートを開く際にエラーが発生しました．エラー内容は以下のとおりです．");
     Logger.log(e);
     return null; // エラー
   }
@@ -144,11 +152,11 @@ function setup() {
   const sheet = getWebHookSheet(); // WebHookURLを含むシート
 
   if (sheet === null) {
-    console.error("【エラー】WebHook処理を行えないため，処理を中止します．");
+    console.error("エラー通知\nWebHook処理を行えないため，処理を中止します．");
     return; // エラー
   }
 
-  notifyToSlack("【テスト】送信テストを行います．これは初回動作チェックです．エラーログチャンネルにのみ通知されます．", getWebHookURLfromClassName("エラーログ"), true);
+  notifyToSlack("テスト通知\n送信テストを行います．これは初回動作チェックです．エラーログチャンネルにのみ通知されます．", getWebHookURLfromClassName("エラーログ"), true);
 }
 
 /**
@@ -159,7 +167,7 @@ function classNameCheck() {
   const sheet = getWebHookSheet(); // エラー時はnullが返ってくる
 
   if (sheet === null) {
-    console.error("【エラー】WebHook処理を行えないため，処理を中止します．");
+    console.error("エラー通知\nWebHook処理を行えないため，処理を中止します．");
     return; // エラー
   }
 
@@ -168,7 +176,7 @@ function classNameCheck() {
 
   // 全チャンネルにテストメッセージを送信します．
   for (let i = 0; i < classInfo.length; i++) {
-    notifyToSlack("【テスト】送信テストを行います．クラス名が一致しているか確認してください．クラス名: " + classInfo[i][0], classInfo[i][1], true);
+    notifyToSlack("テスト通知\n送信テストを行います．クラス名が一致しているか確認してください．クラス名: " + classInfo[i][0], classInfo[i][1], true);
   }
 }
 
@@ -181,13 +189,13 @@ function classNameCheck() {
  */
 function notifyToSlack(messtr, slackWebHookURL, doMention) {
   if (slackWebHookURL === "" || slackWebHookURL === null) {
-    console.error("【エラー】WebHook URLが入力されていません．");
+    console.error("エラー通知\nWebHook URLが入力されていません．");
     return; // エラー
   }
 
   // メンション機能
   if (doMention === undefined || doMention === true) {
-    messtr = "<!channel> " + messtr;
+    messtr = "<!channel>\n" + messtr;
   }
 
   // 投稿ユーザとメッセージ
